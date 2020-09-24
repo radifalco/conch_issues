@@ -1,0 +1,99 @@
+DEB [20200924-16:04:52.652] thr=1   paramiko.transport: starting thread (server mode): 0xa0e3a50L
+DEB [20200924-16:04:52.653] thr=1   paramiko.transport: Local version/idstring: SSH-2.0-paramiko_2.7.2
+DEB [20200924-16:04:52.654] thr=1   paramiko.transport: Remote version/idstring: SSH-2.0-Twisted_20.3.0
+INF [20200924-16:04:52.654] thr=1   paramiko.transport: Connected (version 2.0, client Twisted_20.3.0)
+DEB [20200924-16:04:52.655] thr=1   paramiko.transport: kex algos:[u'curve25519-sha256', u'curve25519-sha256@libssh.org', u'ecdh-sha2-nistp256', u'ecdh-sha2-nistp384', u'ecdh-sha2-nistp521', u'diffie-hellman-group-exchange-sha256', u'diffie-hellman-group-exchange-sha1', u'diffie-hellman-group14-sha1'] server key:[u'ecdsa-sha2-nistp256', u'ecdsa-sha2-nistp384', u'ecdsa-sha2-nistp521', u'ssh-rsa', u'ssh-dss'] client encrypt:[u'aes256-ctr', u'aes256-cbc', u'aes192-ctr', u'aes192-cbc', u'aes128-ctr', u'aes128-cbc', u'cast128-cbc', u'blowfish-cbc', u'3des-cbc'] server encrypt:[u'aes256-ctr', u'aes256-cbc', u'aes192-ctr', u'aes192-cbc', u'aes128-ctr', u'aes128-cbc', u'cast128-cbc', u'blowfish-cbc', u'3des-cbc'] client mac:[u'hmac-sha2-512', u'hmac-sha2-384', u'hmac-sha2-256', u'hmac-sha1', u'hmac-md5'] server mac:[u'hmac-sha2-512', u'hmac-sha2-384', u'hmac-sha2-256', u'hmac-sha1', u'hmac-md5'] client compress:[u'none', u'zlib'] server compress:[u'none', u'zlib'] client lang:[u''] server lang:[u''] kex follows?False
+DEB [20200924-16:04:52.656] thr=1   paramiko.transport: Kex agreed: curve25519-sha256@libssh.org
+DEB [20200924-16:04:52.656] thr=1   paramiko.transport: HostKey agreed: ssh-rsa
+DEB [20200924-16:04:52.657] thr=1   paramiko.transport: Cipher agreed: aes256-ctr
+DEB [20200924-16:04:52.657] thr=1   paramiko.transport: MAC agreed: hmac-sha2-512
+DEB [20200924-16:04:52.658] thr=1   paramiko.transport: Compression agreed: none
+DEB [20200924-16:04:52.662] thr=1   paramiko.transport: kex engine KexCurve25519 specified hash_algo <built-in function openssl_sha256>
+DEB [20200924-16:04:52.667] thr=1   paramiko.transport: Switch to new keys ...
+DEB [20200924-16:04:52.671] thr=1   paramiko.transport: Auth request (type=none) service=ssh-connection, username=sample-user
+INF [20200924-16:04:52.671] thr=1   paramiko.transport: Auth rejected (none).
+DEB [20200924-16:04:52.673] thr=1   paramiko.transport: Auth request (type=publickey) service=ssh-connection, username=sample-user
+INF [20200924-16:04:52.675] thr=1   paramiko.transport: Auth rejected (publickey).
+DEB [20200924-16:04:52.677] thr=1   paramiko.transport: Auth request (type=publickey) service=ssh-connection, username=sample-user
+DEB [20200924-16:04:52.682] thr=1   paramiko.transport: Auth request (type=publickey) service=ssh-connection, username=sample-user
+INF [20200924-16:04:52.683] thr=1   paramiko.transport: Auth granted (publickey).
+DEB [20200924-16:04:52.686] thr=1   paramiko.transport: [chan 0] Max packet in: 32768 bytes
+DEB [20200924-16:04:52.686] thr=1   paramiko.transport: [chan 0] Max packet out: 32768 bytes
+DEB [20200924-16:04:52.686] thr=1   paramiko.transport: Secsh channel 0 (session) opened.
+DEB [20200924-16:04:52.687] thr=2   paramiko.transport: Starting handler for subsystem sftp
+DEB [20200924-16:04:52.688] thr=2   paramiko.transport.sftp: [chan 0] Started sftp server on channel <paramiko.Channel 0 (open) window=131072 -> <paramiko.Transport at 0xa0e3a50L (cipher aes256-ctr, 256 bits) (active; 1 open channel(s))>>
+DEB [20200924-16:04:52.788] thr=1   paramiko.transport: EOF in transport thread
+ERR [20200924-16:04:52.790] thr=2   paramiko.transport: Exception in subsystem handler for "sftp": 
+ERR [20200924-16:04:52.792] thr=2   paramiko.transport: Traceback (most recent call last):
+ERR [20200924-16:04:52.792] thr=2   paramiko.transport:   File "/Users/rdifalco/.virtualenvs/SFTP/lib/python2.7/site-packages/paramiko/server.py", line 683, in _run
+ERR [20200924-16:04:52.792] thr=2   paramiko.transport:     self.start_subsystem(self.__name, self.__transport, self.__channel)
+ERR [20200924-16:04:52.793] thr=2   paramiko.transport:   File "/Users/rdifalco/.virtualenvs/SFTP/lib/python2.7/site-packages/paramiko/sftp_server.py", line 142, in start_subsystem
+ERR [20200924-16:04:52.793] thr=2   paramiko.transport:     self._send_server_version()
+ERR [20200924-16:04:52.793] thr=2   paramiko.transport:   File "/Users/rdifalco/.virtualenvs/SFTP/lib/python2.7/site-packages/paramiko/sftp.py", line 145, in _send_server_version
+ERR [20200924-16:04:52.793] thr=2   paramiko.transport:     t, data = self._read_packet()
+ERR [20200924-16:04:52.794] thr=2   paramiko.transport:   File "/Users/rdifalco/.virtualenvs/SFTP/lib/python2.7/site-packages/paramiko/sftp.py", line 201, in _read_packet
+ERR [20200924-16:04:52.794] thr=2   paramiko.transport:     x = self._read_all(4)
+ERR [20200924-16:04:52.794] thr=2   paramiko.transport:   File "/Users/rdifalco/.virtualenvs/SFTP/lib/python2.7/site-packages/paramiko/sftp.py", line 188, in _read_all
+ERR [20200924-16:04:52.794] thr=2   paramiko.transport:     raise EOFError()
+ERR [20200924-16:04:52.795] thr=2   paramiko.transport: EOFError
+ERR [20200924-16:04:52.795] thr=2   paramiko.transport: 
+DEB [20200924-16:05:59.008] thr=1   paramiko.transport: starting thread (server mode): 0x12391550L
+DEB [20200924-16:05:59.009] thr=1   paramiko.transport: Local version/idstring: SSH-2.0-paramiko_2.7.2
+DEB [20200924-16:05:59.011] thr=1   paramiko.transport: Remote version/idstring: SSH-2.0-Twisted_20.3.0
+INF [20200924-16:05:59.011] thr=1   paramiko.transport: Connected (version 2.0, client Twisted_20.3.0)
+DEB [20200924-16:05:59.014] thr=1   paramiko.transport: kex algos:[u'curve25519-sha256', u'curve25519-sha256@libssh.org', u'ecdh-sha2-nistp256', u'ecdh-sha2-nistp384', u'ecdh-sha2-nistp521', u'diffie-hellman-group-exchange-sha256', u'diffie-hellman-group-exchange-sha1', u'diffie-hellman-group14-sha1'] server key:[u'ecdsa-sha2-nistp256', u'ecdsa-sha2-nistp384', u'ecdsa-sha2-nistp521', u'ssh-rsa', u'ssh-dss'] client encrypt:[u'aes256-ctr', u'aes256-cbc', u'aes192-ctr', u'aes192-cbc', u'aes128-ctr', u'aes128-cbc', u'cast128-cbc', u'blowfish-cbc', u'3des-cbc'] server encrypt:[u'aes256-ctr', u'aes256-cbc', u'aes192-ctr', u'aes192-cbc', u'aes128-ctr', u'aes128-cbc', u'cast128-cbc', u'blowfish-cbc', u'3des-cbc'] client mac:[u'hmac-sha2-512', u'hmac-sha2-384', u'hmac-sha2-256', u'hmac-sha1', u'hmac-md5'] server mac:[u'hmac-sha2-512', u'hmac-sha2-384', u'hmac-sha2-256', u'hmac-sha1', u'hmac-md5'] client compress:[u'none', u'zlib'] server compress:[u'none', u'zlib'] client lang:[u''] server lang:[u''] kex follows?False
+DEB [20200924-16:05:59.015] thr=1   paramiko.transport: Kex agreed: curve25519-sha256@libssh.org
+DEB [20200924-16:05:59.016] thr=1   paramiko.transport: HostKey agreed: ssh-rsa
+DEB [20200924-16:05:59.016] thr=1   paramiko.transport: Cipher agreed: aes256-ctr
+DEB [20200924-16:05:59.017] thr=1   paramiko.transport: MAC agreed: hmac-sha2-512
+DEB [20200924-16:05:59.017] thr=1   paramiko.transport: Compression agreed: none
+DEB [20200924-16:05:59.022] thr=1   paramiko.transport: kex engine KexCurve25519 specified hash_algo <built-in function openssl_sha256>
+DEB [20200924-16:05:59.025] thr=1   paramiko.transport: Switch to new keys ...
+DEB [20200924-16:05:59.029] thr=1   paramiko.transport: Auth request (type=none) service=ssh-connection, username=sample-user
+INF [20200924-16:05:59.030] thr=1   paramiko.transport: Auth rejected (none).
+DEB [20200924-16:05:59.032] thr=1   paramiko.transport: Auth request (type=publickey) service=ssh-connection, username=sample-user
+INF [20200924-16:05:59.033] thr=1   paramiko.transport: Auth rejected (publickey).
+DEB [20200924-16:05:59.035] thr=1   paramiko.transport: Auth request (type=publickey) service=ssh-connection, username=sample-user
+DEB [20200924-16:05:59.042] thr=1   paramiko.transport: Auth request (type=publickey) service=ssh-connection, username=sample-user
+INF [20200924-16:05:59.043] thr=1   paramiko.transport: Auth granted (publickey).
+DEB [20200924-16:05:59.047] thr=1   paramiko.transport: [chan 0] Max packet in: 32768 bytes
+DEB [20200924-16:05:59.048] thr=1   paramiko.transport: [chan 0] Max packet out: 32768 bytes
+DEB [20200924-16:05:59.048] thr=1   paramiko.transport: Secsh channel 0 (session) opened.
+DEB [20200924-16:05:59.050] thr=2   paramiko.transport: Starting handler for subsystem sftp
+DEB [20200924-16:05:59.050] thr=2   paramiko.transport.sftp: [chan 0] Started sftp server on channel <paramiko.Channel 0 (open) window=131072 -> <paramiko.Transport at 0x12391550L (cipher aes256-ctr, 256 bits) (active; 1 open channel(s))>>
+DEB [20200924-16:05:59.053] thr=2   paramiko.transport.sftp: [chan 0] Request: mkdir
+DEB [20200924-16:05:59.056] thr=2   paramiko.transport.sftp: [chan 0] Request: open
+DEB [20200924-16:05:59.061] thr=2   paramiko.transport.sftp: [chan 0] Request: write
+DEB [20200924-16:05:59.063] thr=2   paramiko.transport.sftp: [chan 0] Request: close
+DEB [20200924-16:05:59.165] thr=1   paramiko.transport: EOF in transport thread
+DEB [20200924-16:05:59.165] thr=2   paramiko.transport.sftp: [chan 0] EOF -- end of session
+DEB [20200924-16:06:27.230] thr=1   paramiko.transport: starting thread (server mode): 0xd9e8c90L
+DEB [20200924-16:06:27.231] thr=1   paramiko.transport: Local version/idstring: SSH-2.0-paramiko_2.7.2
+DEB [20200924-16:06:27.232] thr=1   paramiko.transport: Remote version/idstring: SSH-2.0-Twisted_20.3.0
+INF [20200924-16:06:27.232] thr=1   paramiko.transport: Connected (version 2.0, client Twisted_20.3.0)
+DEB [20200924-16:06:27.233] thr=1   paramiko.transport: kex algos:[u'curve25519-sha256', u'curve25519-sha256@libssh.org', u'ecdh-sha2-nistp256', u'ecdh-sha2-nistp384', u'ecdh-sha2-nistp521', u'diffie-hellman-group-exchange-sha256', u'diffie-hellman-group-exchange-sha1', u'diffie-hellman-group14-sha1'] server key:[u'ecdsa-sha2-nistp256', u'ecdsa-sha2-nistp384', u'ecdsa-sha2-nistp521', u'ssh-rsa', u'ssh-dss'] client encrypt:[u'aes256-ctr', u'aes256-cbc', u'aes192-ctr', u'aes192-cbc', u'aes128-ctr', u'aes128-cbc', u'cast128-cbc', u'blowfish-cbc', u'3des-cbc'] server encrypt:[u'aes256-ctr', u'aes256-cbc', u'aes192-ctr', u'aes192-cbc', u'aes128-ctr', u'aes128-cbc', u'cast128-cbc', u'blowfish-cbc', u'3des-cbc'] client mac:[u'hmac-sha2-512', u'hmac-sha2-384', u'hmac-sha2-256', u'hmac-sha1', u'hmac-md5'] server mac:[u'hmac-sha2-512', u'hmac-sha2-384', u'hmac-sha2-256', u'hmac-sha1', u'hmac-md5'] client compress:[u'none', u'zlib'] server compress:[u'none', u'zlib'] client lang:[u''] server lang:[u''] kex follows?False
+DEB [20200924-16:06:27.233] thr=1   paramiko.transport: Kex agreed: curve25519-sha256@libssh.org
+DEB [20200924-16:06:27.233] thr=1   paramiko.transport: HostKey agreed: ssh-rsa
+DEB [20200924-16:06:27.234] thr=1   paramiko.transport: Cipher agreed: aes256-ctr
+DEB [20200924-16:06:27.234] thr=1   paramiko.transport: MAC agreed: hmac-sha2-512
+DEB [20200924-16:06:27.234] thr=1   paramiko.transport: Compression agreed: none
+DEB [20200924-16:06:27.238] thr=1   paramiko.transport: kex engine KexCurve25519 specified hash_algo <built-in function openssl_sha256>
+DEB [20200924-16:06:47.526] thr=1   paramiko.transport: Switch to new keys ...
+DEB [20200924-16:06:47.533] thr=1   paramiko.transport: Auth request (type=none) service=ssh-connection, username=sample-user
+INF [20200924-16:06:47.533] thr=1   paramiko.transport: Auth rejected (none).
+DEB [20200924-16:06:47.541] thr=1   paramiko.transport: Auth request (type=publickey) service=ssh-connection, username=sample-user
+INF [20200924-16:06:47.544] thr=1   paramiko.transport: Auth rejected (publickey).
+DEB [20200924-16:06:47.555] thr=1   paramiko.transport: Auth request (type=publickey) service=ssh-connection, username=sample-user
+DEB [20200924-16:06:47.570] thr=1   paramiko.transport: Auth request (type=publickey) service=ssh-connection, username=sample-user
+INF [20200924-16:06:47.573] thr=1   paramiko.transport: Auth granted (publickey).
+DEB [20200924-16:06:47.576] thr=1   paramiko.transport: [chan 0] Max packet in: 32768 bytes
+DEB [20200924-16:06:47.576] thr=1   paramiko.transport: [chan 0] Max packet out: 32768 bytes
+DEB [20200924-16:06:47.576] thr=1   paramiko.transport: Secsh channel 0 (session) opened.
+DEB [20200924-16:06:47.580] thr=2   paramiko.transport: Starting handler for subsystem sftp
+DEB [20200924-16:06:47.581] thr=2   paramiko.transport.sftp: [chan 0] Started sftp server on channel <paramiko.Channel 0 (open) window=131072 -> <paramiko.Transport at 0xd9e8c90L (cipher aes256-ctr, 256 bits) (active; 1 open channel(s))>>
+DEB [20200924-16:06:49.171] thr=2   paramiko.transport.sftp: [chan 0] Request: mkdir
+DEB [20200924-16:06:49.174] thr=2   paramiko.transport.sftp: [chan 0] Request: open
+DEB [20200924-16:06:49.178] thr=2   paramiko.transport.sftp: [chan 0] Request: write
+DEB [20200924-16:06:49.190] thr=2   paramiko.transport.sftp: [chan 0] Request: close
+DEB [20200924-16:06:55.606] thr=1   paramiko.transport: EOF in transport thread
+DEB [20200924-16:06:55.608] thr=2   paramiko.transport.sftp: [chan 0] EOF -- end of session
