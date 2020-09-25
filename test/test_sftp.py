@@ -1,11 +1,16 @@
+import traceback
+
 import paramiko
+import pytest
 from mocksftp.keys import SAMPLE_USER_PRIVATE_KEY
 from pytest_twisted.plugin import inlineCallbacks
+from twisted.internet.error import ConnectionLost
 
 import sftp
 from sftp import SFTPClientOptions, FileInfo
 
 paramiko.util.log_to_file('paramiko.log')
+
 
 @inlineCallbacks
 def test_sftp_error(sftp_server):
@@ -29,8 +34,11 @@ def test_sftp_error(sftp_server):
     # Mimic a server shutting us down
     sftp_server.stop()
 
-    # Why does this hang? No result callback or errback
-    yield sftp.send_file(client, FileInfo(
-        directory="test-directory2",
-        name="test-file2.txt",
-        data="This is data2"))
+    with pytest.raises(ConnectionLost):
+        # Why does this hang? No result callback or errback
+        yield sftp.send_file(client, FileInfo(
+            directory="test-directory2",
+            name="test-file2.txt",
+            data="This is data2"))
+
+    sftp_server.start()

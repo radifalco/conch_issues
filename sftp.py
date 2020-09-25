@@ -1,8 +1,6 @@
 """
 Uses twisted conch to create an SFTP client that can send files.
 """
-import traceback
-from sys import stdout
 
 import attr
 from attr.converters import optional
@@ -15,11 +13,10 @@ from twisted.conch.ssh.common import NS
 from twisted.conch.ssh.connection import SSHConnection
 from twisted.conch.ssh.filetransfer import FileTransferClient, FXF_WRITE, FXF_CREAT, FXF_TRUNC, SFTPError, \
     ClientFile  # noqa
-from twisted.internet import reactor
+from twisted.internet import reactor, defer, error
 from twisted.internet.defer import Deferred, inlineCallbacks, returnValue, succeed, fail, log
-from twisted.internet.protocol import connectionDone, BaseProtocol
-
-
+from twisted.internet.protocol import connectionDone
+from twisted.python import failure
 
 """
 Default Chunk Size. The max chunk size is system dependent, this provides a reasonable default
@@ -66,54 +63,6 @@ class SFTPClientOptions(object):
 
 
 @inlineCallbacks
-def sftp_send(client_options, file_info):
-    # type: (SFTPClientOptions, FileInfo)->Deferred
-    """
-    Primary function to send an file over SFTP. You can send a password, identity, or both.
-    :param client_options: the client connection options
-    :param file_info: contains the file info to write
-    :return: A deferred that signals "OK" if successful.
-    """
-    sftp_client = yield get_client(client_options=client_options)
-
-    result = yield send_file(sftp_client, file_info)
-
-    log.info("sftp_send ({result})", result=result)
-
-    fileInfo = FileInfo(directory="test-sftp", name="callLater.txt", data="Hello\n")
-    reactor.callLater(920, send_file, sftp_client, fileInfo)
-
-    returnValue("OK")
-
-
-def connect(host, port, options, verifyHostKey, userAuthObject):
-    return _ebConnect(None, host, port, options, verifyHostKey,
-                      userAuthObject)
-
-
-def _ebConnect(f, host, port, options, vhk, uao):
-    d = _connect(host, port, options, vhk, uao)
-    d.addErrback(_ebConnect, host, port, options, vhk, uao)
-    return d
-
-
-def _connect(host, port, options, verifyHostKey, userAuthObject):
-    d = Deferred()
-    factory = MySSHClientFactory(d, options, verifyHostKey, userAuthObject)
-    reactor.connectTCP(host, port, factory)
-    return d
-
-
-class MySSHClientFactory(SSHClientFactory):
-    def clientConnectionLost(self, connector, reason):
-        # should this reason be going a deferred?
-        log.info("Factory connection lost. reason={reason}", reason=reason)
-#        log.info("RECONNECTING: {connector}", connector=connector)
-        # connector.connect()
-        pass
-
-
-@inlineCallbacks
 def get_client(client_options):
     # type: (SFTPClientOptions)->Deferred
     """
@@ -133,35 +82,37 @@ def get_client(client_options):
 
     conn = SFTPConnection()
     auth = SFTPUserAuthClient(client_options.user, options, conn)
-    yield connect(client_options.host, client_options.port, options, _verify_host_key, auth)
-    sftpClient = yield conn.getSftpClientDeferred()
+    factory = yield connect(options, auth)
+    factory.client = yield conn.getSftpClientDeferred()
 
-    log.info("What did we get? {client}", client=repr(sftpClient))
-    returnValue(sftpClient)
+    returnValue(factory)
+
+
+def connect(options, userAuthObject):
+    d = Deferred()
+    factory = SFTPClientFactory(d, options, userAuthObject)
+    reactor.connectTCP(options["host"], options["port"], factory)
+    return d.addCallback(lambda ignore: factory)
+
+
+class SFTPClientFactory(SSHClientFactory):
+
+    def __init__(self, d, options, userAuthObject):
+        SSHClientFactory.__init__(self, d, options, _verify_host_key, userAuthObject)
+
+    def clientConnectionLost(self, connector, reason):
+        self.client.connectionLost(reason)
+
+    def makeDirectory(self, path, attrs):
+        return self.client.makeDirectory(path, attrs)
+
+    def openFile(self, filename, flags, attrs):
+        return self.client.openFile(filename, flags, attrs)
 
 
 def _verify_host_key(transport, host, pubKey, fingerprint):
-    """
-    Verify a host's key. Based on what is specified in options.
-
-    @param host: Due to a bug in L{SSHClientTransport.verifyHostKey}, this is
-    always the dotted-quad IP address of the host being connected to.
-    @type host: L{str}
-
-    @param transport: the client transport which is attempting to connect to
-    the given host.
-    @type transport: L{SSHClientTransport}
-
-    @param fingerprint: the fingerprint of the given public key, in
-    xx:xx:xx:... format.
-
-    @param pubKey: The public key of the server being connected to.
-    @type pubKey: L{str}
-
-    @return: a L{Deferred} which is success or error
-    """
     expected = transport.factory.options.get("fingerprint", None)
-    if not expected or fingerprint == expected:
+    if fingerprint == expected:
         return succeed(1)
 
     log.error(
@@ -173,14 +124,9 @@ def _verify_host_key(transport, host, pubKey, fingerprint):
 
 class SFTPSession(SSHChannel):
     """
-    Creates an SFTP session.
+    Creates an SFTP session. This is used to connect the SFTPClient.
     """
     name = "session"
-
-    def __init__(self, localWindow=0, localMaxPacket=0, remoteWindow=0, remoteMaxPacket=0, conn=None, data=None,
-                 avatar=None):
-        SSHChannel.__init__(self, localWindow, localMaxPacket, remoteWindow, remoteMaxPacket, conn, data, avatar)
-        self.client = SFTPClient()
 
     @inlineCallbacks
     def channelOpen(self, whatever):
@@ -192,38 +138,42 @@ class SFTPSession(SSHChannel):
         """
         yield self.conn.sendRequest(self, "subsystem", NS("sftp"), wantReply=True)
 
-        self.client.makeConnection(self)
-        self.dataReceived = self.client.dataReceived
-        self.conn.notifyClientIsReady(self.client)
-
-    def closeReceived(self):
-        log.info("SFTPSession#closeRecieved")
-        SSHChannel.closeReceived(self)
-
-    def loseConnection(self):
-        log.info("SFTPSession#loseConnection")
-        SSHChannel.loseConnection(self)
-
-    def closed(self):
-        traceback.print_stack(limit=15)
-        SSHChannel.closed(self)
+        client = SFTPClient()
+        client.makeConnection(self)
+        self.dataReceived = client.dataReceived
+        self.conn.notifyClientIsReady(client)
 
 
 class SFTPClient(FileTransferClient):
 
-    def __init__(self, extData={}):
-        FileTransferClient.__init__(self, extData)
-        self.healthy = True
+    def _sendRequest(self, msg, data):
+        """
+        The conch implementation appears to have a bug in it. This ensures we will fail if
+        the connection has been lost rather than strand the request deferred.
+        """
+        if not self.connected:
+            return defer.fail(error.ConnectionLost())
+
+        return FileTransferClient._sendRequest(self, msg, data)
 
     def connectionLost(self, reason=connectionDone):
-        log.info("SFTPClient:connectionLost {connected}", connected=self.connected)
-        self.healthy = False
-        self.connected = 0
+        """
+        Called when connection to the remote subsystem was lost.
+        Any pending requests are aborted.
+        """
+        self.connected = False
 
-    def makeConnection(self, transport):
-        log.info("SFTPClient:makeConnection {connected}", connected=self.connected)
-        self.healthy = True
-        BaseProtocol.makeConnection(self, transport)
+        # If there are still requests waiting for responses when the
+        # connection is lost, fail them.
+        if self.openRequests:
+            # Even if our transport was lost "cleanly", our
+            # requests were still not cancelled "cleanly".
+            requestError = error.ConnectionLost()
+            requestError.__cause__ = reason.value
+            requestFailure = failure.Failure(requestError)
+            while self.openRequests:
+                _, deferred = self.openRequests.popitem()
+                deferred.errback(requestFailure)
 
 
 class SFTPConnection(SSHConnection):
@@ -283,9 +233,6 @@ def send_file(client, file_info):
         log.info("makeDirectory -> ({result})", result=str(d))
 
     except SFTPError as e:
-        log.info("SFTPError! ({error})", error=repr(e))
-        log.error(traceback.format_exc())
-
         # In testing on various system, either a 4 or an 11 will indicate the directory
         # already exist. We are fine with that and want to continue if it does. If we misinterpreted
         # error code here we are probably still ok since we will just get the more systemic error
@@ -293,12 +240,6 @@ def send_file(client, file_info):
         if e.code != 4 and e.code != 11:
             raise e
 
-    except BaseException as e:
-        log.info("WHOOPS! ({error})", error=repr(e))
-        log.error(traceback.format_exc())
-        raise e
-
-    log.info("openFile...")
     f = yield client.openFile(file_info.to_path(), FXF_WRITE | FXF_CREAT | FXF_TRUNC, {})
 
     try:
